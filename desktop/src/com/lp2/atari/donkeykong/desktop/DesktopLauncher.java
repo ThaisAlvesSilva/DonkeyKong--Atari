@@ -9,5 +9,6 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		new LwjglApplication(new DonkeyKong(), config);
 		System.out.print("aopa");
+		System.out.print("Pablo esteve aqui");
 	}
 }
