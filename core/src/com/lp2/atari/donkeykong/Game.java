@@ -2,17 +2,34 @@ package com.lp2.atari.donkeykong;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.Timer;
+
+import java.util.concurrent.TimeUnit;
 
 public class Game extends ApplicationAdapter {
 	SpriteBatch batch;
 	Stage stage;
 	Objeto plataforma;
+	Objeto escada;
+	Objeto macaco;
+	int spriteDonkeyKong;
+	Movel mario;
+	Timer timer;
+
 	@Override
 	public void create () {
+		timer = new Timer();
+
+		spriteDonkeyKong = 1;
+
 		batch = new SpriteBatch();
 
 		stage = new Stage();
@@ -48,15 +65,87 @@ public class Game extends ApplicationAdapter {
 		//Dados da plataforma 8
 		plataforma = new Objeto("plataforma_inteira.png",40,5,550, 35);
 		stage.addActor(plataforma.getImg());
+
+		//Escada 1
+		escada = new Objeto("escada.png", 220, 325, 40, 63);
+		stage.addActor(escada.getImg());
+
+		//Escada 2
+		escada = new Objeto("escada.png", 545, 230, 40, 63);
+		stage.addActor(escada.getImg());
+
+		//Escada 3
+		escada = new Objeto("escada.png", 205, 135, 40, 63);
+		stage.addActor(escada.getImg());
+
+		//Escada 4
+		escada = new Objeto("escada.png", 500, 40, 40, 63);
+		stage.addActor(escada.getImg());
+
+		//Donkey Kong
+		macaco = new Objeto("donkey_kong_1.png", 60, 420, 50, 50);
+		stage.addActor(macaco.getImg());
+
+		//Mario
+		mario = new Movel("mario_2_1.png", 60, 40, 30, 26, 0, 0);
+		stage.addActor(mario.getImg());
 	}
-
-
 
 	@Override
 	public void render () {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
+
+		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+
+			for(Actor actor : stage.getActors()){
+				//Se é o Mario
+				if(actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()){
+					actor.remove();
+				}
+			}
+
+			mario.setPosX(mario.getPosX() + 5);
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), 40, 30, 26, 0, 0);
+			stage.addActor(mario.getImg());
+
+		}
+
+		for(Actor actor : stage.getActors()) {
+			//Se o actor é o Donkey Kong
+			if (actor.getX() == macaco.getPosX() && actor.getY() == macaco.getPosY()) {
+				actor.remove();
+			}
+		}
+
+		/**if(spriteDonkeyKong > 2){
+			spriteDonkeyKong = 1;
+		}**/
+
+		/**Delay em milisegundos
+		try {
+			Thread.sleep(666);
+		}
+		catch(InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}**/
+
+		if(spriteDonkeyKong <= 60){
+			//Donkey Kong
+			macaco = new Objeto("donkey_kong_" + 1 + ".png", 60, 420, 50, 50);
+			stage.addActor(macaco.getImg());
+			spriteDonkeyKong++;
+		}else if(spriteDonkeyKong <= 120){
+			//Donkey Kong
+			macaco = new Objeto("donkey_kong_" + 2 + ".png", 60, 420, 50, 50);
+			stage.addActor(macaco.getImg());
+			spriteDonkeyKong++;
+		}
+
+		if(spriteDonkeyKong == 120){
+			spriteDonkeyKong = 1;
+		}
 
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
