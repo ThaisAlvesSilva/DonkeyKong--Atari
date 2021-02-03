@@ -2,13 +2,11 @@ package com.lp2.atari.donkeykong.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.lp2.atari.donkeykong.DonkeyKong;
+import com.lp2.atari.donkeykong.Game;
 
-public class DesktopLauncher {
+public class Principal {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new DonkeyKong(), config);
-		System.out.print("aopa");
-		System.out.print("Pablo esteve aqui");
+		new LwjglApplication(new Game(), config);
 	}
 }
