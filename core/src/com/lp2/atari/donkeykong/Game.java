@@ -19,6 +19,7 @@ public class Game extends ApplicationAdapter {
 	Stage stage;
 	Objeto plataforma;
 	Objeto escada;
+	Objeto escada4;
 	Objeto macaco;
 	int spriteDonkeyKong;
 	Movel mario;
@@ -127,18 +128,6 @@ public class Game extends ApplicationAdapter {
 		//o mario sobe as escadas
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
 
-			for (Actor actor : stage.getActors()) {
-				//Se é o Mario
-				if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
-					actor.remove();
-				}
-			}
-			mario.setPosY(mario.getPosY() + 1);
-			mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
-			stage.addActor(mario.getImg());
-		}
-		//o mario desce as escadas
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 
 			for (Actor actor : stage.getActors()) {
 				//Se é o Mario
@@ -146,10 +135,82 @@ public class Game extends ApplicationAdapter {
 					actor.remove();
 				}
 			}
-			mario.setPosY(mario.getPosY() - 1);
-			mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+
+			if (mario.getPosY() < 135){
+				if (mario.getPosX() >= 500 && mario.getPosX() <= 540) {
+					System.out.println("mario1:"+mario.getPosY());
+							mario.setPosY(mario.getPosY() + 1);
+							mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+							stage.addActor(mario.getImg());
+						}
+			}else if (mario.getPosY() >= 135 && mario.getPosY() < 230){
+				if (mario.getPosX() >= 205 && mario.getPosX() <= 245) {
+					System.out.println("mario2:"+mario.getPosY());
+					mario.setPosY(mario.getPosY() + 1);
+					mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+					stage.addActor(mario.getImg());
+				}
+			}else if (mario.getPosY() >= 230 && mario.getPosY() < 320){
+				if (mario.getPosX() >= 545 && mario.getPosX() <= 585) {
+					System.out.println("mario3:"+mario.getPosY());
+					mario.setPosY(mario.getPosY() + 1);
+					mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+					stage.addActor(mario.getImg());
+				}
+			}else if (mario.getPosY() >= 320 && mario.getPosY() <= 415){
+				if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
+					System.out.println("mario4:"+mario.getPosY());
+					mario.setPosY(mario.getPosY() + 1);
+					mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+					stage.addActor(mario.getImg());
+				}
+			}
 			stage.addActor(mario.getImg());
 		}
+
+		//o mario desce as escadas
+		 if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+			 System.out.println(mario.getPosY());
+			 for (Actor actor : stage.getActors()) {
+				 //Se é o Mario
+				 if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
+					 actor.remove();
+				 }
+			 }
+
+			 if (mario.getPosY() > 40 && mario.getPosY() <= 136) {
+				 if (mario.getPosX() >= 500 && mario.getPosX() <= 540) {
+					 mario.setPosY(mario.getPosY() - 1);
+					 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+					 stage.addActor(mario.getImg());
+				 }
+			 } else if (mario.getPosY() >= 136 && mario.getPosY() <= 232) {
+				 if (mario.getPosX() >= 205 && mario.getPosX() <= 245) {
+					 mario.setPosY(mario.getPosY() - 1);
+					 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+					 stage.addActor(mario.getImg());
+				 }
+			 } else if (mario.getPosY() >= 232 && mario.getPosY() <= 322) {
+				 if (mario.getPosX() >=  545 && mario.getPosX() <= 585) {
+					 mario.setPosY(mario.getPosY() - 1);
+					 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+					 stage.addActor(mario.getImg());
+				 }
+			 } else if (mario.getPosY() >= 322 && mario.getPosY() <= 415) {
+				 if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
+					 mario.setPosY(mario.getPosY() - 1);
+					 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+					 stage.addActor(mario.getImg());
+				 }
+			 }else if (mario.getPosY() >= 418) {
+				 if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
+					 mario.setPosY(mario.getPosY() - 1);
+					 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+					 stage.addActor(mario.getImg());
+				 }
+			 }
+			 stage.addActor(mario.getImg());
+		 }
 
 		for (Actor actor : stage.getActors()) {
 			//Se o actor é o Donkey Kong
