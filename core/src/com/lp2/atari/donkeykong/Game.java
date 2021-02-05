@@ -19,6 +19,11 @@ public class Game extends ApplicationAdapter {
 	Stage stage;
 	Objeto plataforma;
 	Objeto escada;
+	Objeto escada4;
+	Objeto escada3;
+	Objeto escada2;
+	Objeto escada1;
+
 	Objeto macaco;
 	int spriteDonkeyKong;
 	Movel mario;
@@ -97,22 +102,58 @@ public class Game extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 
-			for(Actor actor : stage.getActors()){
+			for (Actor actor : stage.getActors()) {
 				//Se é o Mario
-				if(actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()){
+				if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
 					actor.remove();
 				}
 			}
-
-			mario.setPosX(mario.getPosX() + 5);
-			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), 40, 30, 26, 0, 0);
+			mario.setPosX(mario.getPosX() + 1);
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
 			stage.addActor(mario.getImg());
 
 		}
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 
-		for(Actor actor : stage.getActors()) {
+			for (Actor actor : stage.getActors()) {
+				//Se é o Mario
+				if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
+					actor.remove();
+				}
+			}
+			mario.setPosX(mario.getPosX() - 1);
+			mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 0, 0);
+			stage.addActor(mario.getImg());
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+
+			for (Actor actor : stage.getActors()) {
+				//Se é o Mario
+				if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
+					actor.remove();
+				}
+			}
+			mario.setPosY(mario.getPosY() + 1);
+			mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+			stage.addActor(mario.getImg());
+		}
+
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+
+			for (Actor actor : stage.getActors()) {
+				//Se é o Mario
+				if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
+					actor.remove();
+				}
+			}
+			mario.setPosY(mario.getPosY() - 1);
+			mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+			stage.addActor(mario.getImg());
+		}
+
+		for (Actor actor : stage.getActors()) {
 			//Se o actor é o Donkey Kong
 			if (actor.getX() == macaco.getPosX() && actor.getY() == macaco.getPosY()) {
 				actor.remove();
