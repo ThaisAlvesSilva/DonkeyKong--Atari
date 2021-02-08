@@ -21,6 +21,10 @@ public class Objeto {
         this.img.setSize(this.sizeX,this.sizeY);
     }
 
+    public void setImg(Image img) {
+        this.img = img;
+    }
+
     public Image getImg() {
         return img;
     }

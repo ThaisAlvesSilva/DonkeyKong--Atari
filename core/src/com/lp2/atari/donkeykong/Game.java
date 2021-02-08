@@ -20,7 +20,7 @@ public class Game extends ApplicationAdapter {
     Objeto plataforma;
     Objeto escada;
     Objeto escada4;
-    Objeto macaco;
+    AnimatedObject macaco;
     int spriteDonkeyKong;
     Movel mario;
     Timer timer;
@@ -84,16 +84,18 @@ public class Game extends ApplicationAdapter {
         stage.addActor(escada.getImg());
 
         //Donkey Kong
-        macaco = new Objeto("donkey_kong_1.png", 60, 420, 50, 50);
+        macaco = new AnimatedObject("donkey_kong_1.png", 60, 420, 50, 50);
         stage.addActor(macaco.getImg());
 
         //Mario
-        mario = new Movel("mario_2_1.png", 60, 40, 30, 26, 0, 0);
+        mario = new Movel("mario_2_1.png", 60, 40, 30, 26, 1, 1);
         stage.addActor(mario.getImg());
     }
 
     @Override
     public void render() {
+        System.out.println("MARIO X: " + mario.getPosX() + " Y: " + mario.getPosY());
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
@@ -169,7 +171,7 @@ public class Game extends ApplicationAdapter {
          catch(InterruptedException ex) {
          Thread.currentThread().interrupt();
          }**/
-
+/*
         if (spriteDonkeyKong <= 60) {
             //Donkey Kong
             macaco = new Objeto("donkey_kong_" + 1 + ".png", 60, 420, 50, 50);
@@ -184,7 +186,10 @@ public class Game extends ApplicationAdapter {
 
         if (spriteDonkeyKong == 120) {
             spriteDonkeyKong = 1;
-        }
+        }*/
+
+        spriteDonkeyKong++;
+        spriteDonkeyKong = macaco.startAnimation(stage, spriteDonkeyKong, "donkey_kong_1.png", "donkey_kong_2.png" );
 
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -192,106 +197,108 @@ public class Game extends ApplicationAdapter {
     }
 
     public void desceuEscada() {
+        //Escada 4
         if (mario.getPosY() > 40 && mario.getPosY() <= 136) {
-            if (mario.getPosX() >= 500 && mario.getPosX() <= 540) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 485 && mario.getPosX() <= 527) {
+                mario.setPosY(mario.getPosY() - mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 1, 1);
             }
         } else if (mario.getPosY() >= 136 && mario.getPosY() <= 232) {
-            if (mario.getPosX() >= 205 && mario.getPosX() <= 245) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 191 && mario.getPosX() <= 229) { //Escada 3
+                mario.setPosY(mario.getPosY() - mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 1, 1);
             }
         } else if (mario.getPosY() >= 232 && mario.getPosY() <= 325) {
-            if (mario.getPosX() >= 545 && mario.getPosX() <= 585) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 531 && mario.getPosX() <= 570) {
+                mario.setPosY(mario.getPosY() - mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 1, 1);
             }
         } else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
-            if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 207 && mario.getPosX() <= 247) {
+                mario.setPosY(mario.getPosY() - mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 1, 1);
             }
         } else if (mario.getPosY() >= 418) {
-            if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
-				mario.setPosY(mario.getPosY() - 1);
-				mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 207 && mario.getPosX() <= 247) {
+				mario.setPosY(mario.getPosY() - mario.getVelY());
+				mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 1, 1);
 			}
         }
     }
 
     public void subiuEscada() {
+        //Escada 4
         if (mario.getPosY() < 135) {
-            if (mario.getPosX() >= 500 && mario.getPosX() <= 540) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 485 && mario.getPosX() <= 527) {
+                mario.setPosY(mario.getPosY() + mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 1, 1);
             }
-        } else if (mario.getPosY() >= 135 && mario.getPosY() < 230) {
-            if (mario.getPosX() >= 205 && mario.getPosX() <= 245) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+        } else if (mario.getPosY() >= 135 && mario.getPosY() < 230) { //Escada 3
+            if (mario.getPosX() >= 191 && mario.getPosX() <= 229) {
+                mario.setPosY(mario.getPosY() + mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 1, 1);
             }
         } else if (mario.getPosY() >= 230 && mario.getPosY() < 325) {
-            if (mario.getPosX() >= 545 && mario.getPosX() <= 585) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 531 && mario.getPosX() <= 570) {
+                mario.setPosY(mario.getPosY() + mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 1, 1);
             }
         } else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
-            if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+            if (mario.getPosX() >= 207 && mario.getPosX() <= 247) {
+                mario.setPosY(mario.getPosY() + mario.getVelY());
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 1, 1);
             }
         }
     }
 	public void andarDireita() {
 		if (mario.getPosY() == 40) {
 
-			mario.setPosX(mario.getPosX() + 1);
-			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+			mario.setPosX(mario.getPosX() + mario.getVelX());
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 1, 1);
 
 		} else if (mario.getPosY() ==136) {
 
-			mario.setPosX(mario.getPosX() + 1);
-			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+			mario.setPosX(mario.getPosX() + mario.getVelX());
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 1, 1);
 
 		} else if (mario.getPosY() ==232) {
 
-			mario.setPosX(mario.getPosX() + 1);
-			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+			mario.setPosX(mario.getPosX() + mario.getVelX());
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 1, 1);
 
 		} else if (mario.getPosY() ==325) {
 
-			mario.setPosX(mario.getPosX() + 1);
-			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+			mario.setPosX(mario.getPosX() + mario.getVelX());
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 1, 1);
 
 		} else if (mario.getPosY() == 418) {
 
-			mario.setPosX(mario.getPosX() + 1);
-			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+			mario.setPosX(mario.getPosX() + mario.getVelX());
+			mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 1, 1);
 		}
 	}
 	public void andarEsquerda() {
 		if (mario.getPosY() == 40) {
 
-				mario.setPosX(mario.getPosX() - 1);
-				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 0, 0);
+				mario.setPosX(mario.getPosX() - mario.getVelX());
+				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 1, 1);
 		} else if (mario.getPosY() ==136) {
 
-				mario.setPosX(mario.getPosX() - 1);
-				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 0, 0);
+				mario.setPosX(mario.getPosX() - mario.getVelX());
+				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 1, 1);
 		} else if (mario.getPosY() ==232) {
 
-				mario.setPosX(mario.getPosX() - 1);
-				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 0, 0);
+				mario.setPosX(mario.getPosX() - mario.getVelX());
+				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 1, 1);
 		} else if (mario.getPosY() ==325) {
 
-				mario.setPosX(mario.getPosX() - 1);
-				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 0, 0);
+				mario.setPosX(mario.getPosX() - mario.getVelX());
+				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 1, 1);
 
 		} else if (mario.getPosY() == 418) {
 
-				mario.setPosX(mario.getPosX() - 1);
-				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 0, 0);
+				mario.setPosX(mario.getPosX() - mario.getVelX());
+				mario = new Movel("mario_1_2.png", (mario.getPosX() - 2), mario.getPosY(), 30, 26, 1, 1);
 		}
 	}
     @Override
