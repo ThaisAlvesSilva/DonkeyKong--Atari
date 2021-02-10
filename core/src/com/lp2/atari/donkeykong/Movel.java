@@ -22,31 +22,32 @@ public class Movel extends Objeto{
             }
         }
 
-        if(contador < 31){
+        if(contador < 24){
 
-            this.setPosY(this.getPosY() + 1);
-            this.setPosX(this.getPosX() -2);
+            this.setPosY(this.getPosY()+1);
+            this.setPosX(this.getPosX() - 2);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
         }
-        else if(contador < 61){
+        else if(contador >=24 && contador < 50){
 
             this.setPosY(this.getPosY() - 1);
-            this.setPosX(this.getPosX() -2);
+            this.setPosX(this.getPosX() - 2);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
         }
-        else if(contador == 61){
-
+        else if(contador == 50){
             contador = -1;
+            this.setPosY(this.getPosY()+4);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
+
         }
 
         return contador;
@@ -78,12 +79,13 @@ public class Movel extends Objeto{
             stage.addActor(this.getImg());
         }
         else if(contador == 50){
-
             contador = -1;
+            this.setPosY(this.getPosY()+4);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
+
         }
 
         return contador;
@@ -103,8 +105,9 @@ public class Movel extends Objeto{
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
+
         }
-        else if(contador < 61){
+        else if(contador >= 31 && contador < 61){
 
             this.setPosY(this.getPosY() - 1);
             this.setImg(new Image(new Texture(this.getImgPath())));
@@ -115,10 +118,13 @@ public class Movel extends Objeto{
         else if(contador == 61){
 
             contador = -1;
+           // this.setPosY(this.getPosY()-3);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
+            System.out.println("X:"+this.getPosX());
+            System.out.println("Y:"+this.getPosY());
         }
 
         return contador;

@@ -5,14 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
-
-import java.util.concurrent.TimeUnit;
 
 public class Game extends ApplicationAdapter {
     SpriteBatch batch;
@@ -21,7 +16,7 @@ public class Game extends ApplicationAdapter {
     Objeto escada;
     Objeto escada4;
     Objeto macaco;
-    int spriteDonkeyKong, spritePuloMario;
+    int spriteDonkeyKong, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda;
     Movel mario;
     Timer timer;
     int pulou;
@@ -32,7 +27,9 @@ public class Game extends ApplicationAdapter {
         timer = new Timer();
 
         spriteDonkeyKong = 1;
-        spritePuloMario = 0;
+        spritePuloMarioDireita = 0;
+        spritePuloMarioEsquerda = 0;
+        spritePuloMarioY = 0;
         pulou = 0;
         entrou1 = false;
         entrou2 = false;
@@ -105,8 +102,7 @@ public class Game extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
 
-        System.out.println("X:"+mario.getPosX());
-        System.out.println("Y:"+mario.getPosY());
+
 
         //o Mário anda pra direita
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -160,58 +156,68 @@ public class Game extends ApplicationAdapter {
 			stage.addActor(mario.getImg());
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-           spritePuloMario = 0;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !entrou1){
+           spritePuloMarioY = 0;
            entrou1 = true;
         }
 
-        if(entrou1 && spritePuloMario != -1){
+        if(entrou1 && spritePuloMarioY > -1){
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
                 if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
                     actor.remove();
                 }
             }
-            spritePuloMario++;
-            spritePuloMario = mario.pularY(stage, spritePuloMario);
-        }else{
+            spritePuloMarioY++;
+            spritePuloMarioY = mario.pularY(stage, spritePuloMarioY);
+        }else if(spritePuloMarioY == -1){
+            spritePuloMarioY = 0;
             entrou1 = false;
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            spritePuloMario = 0;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !entrou2){
+            spritePuloMarioDireita = 1;
             entrou2 = true;
         }
 
-        if(entrou2 && spritePuloMario != -1){
+        if(entrou2 && spritePuloMarioDireita > -1){
+            System.out.println("_____________1:"+ spritePuloMarioDireita +"_____________");
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
                 if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
                     actor.remove();
                 }
             }
-            spritePuloMario++;
-            spritePuloMario = mario.pularDiagonalDireita(stage, spritePuloMario);
+            if(spritePuloMarioDireita <=50){
+                spritePuloMarioDireita++;
+                spritePuloMarioDireita = mario.pularDiagonalDireita(stage, spritePuloMarioDireita);
+
+                System.out.println("_____________2: "+ spritePuloMarioDireita +"_____________");
+            }
+
         }
-        else{
+        else if(spritePuloMarioDireita == -1){
+            spritePuloMarioDireita = 1;
+            System.out.println("_____________ENTROU: "+entrou2+"_____________");
             entrou2 = false;
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            spritePuloMario = 0;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.LEFT) && !entrou3){
+            spritePuloMarioEsquerda = 1;
             entrou3 = true;
         }
 
-        if(entrou3 && spritePuloMario != -1){
+        if(entrou3 && spritePuloMarioEsquerda> -1){
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
                 if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
                     actor.remove();
                 }
             }
-            spritePuloMario++;
-            spritePuloMario = mario.pularDiagonalEsquerda(stage, spritePuloMario);
-        }else{
+            spritePuloMarioEsquerda++;
+            spritePuloMarioEsquerda = mario.pularDiagonalEsquerda(stage, spritePuloMarioEsquerda);
+        }else if(spritePuloMarioEsquerda == -1){
+            spritePuloMarioEsquerda =1;
             entrou3 = false;
         }
 
