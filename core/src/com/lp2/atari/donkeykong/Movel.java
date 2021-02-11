@@ -123,8 +123,6 @@ public class Movel extends Objeto{
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
             stage.addActor(this.getImg());
-            System.out.println("X:"+this.getPosX());
-            System.out.println("Y:"+this.getPosY());
         }
 
         return contador;
@@ -143,6 +141,42 @@ public class Movel extends Objeto{
 
     public void setVelY(float velY) {
         this.velY = velY;
+    }
+
+    public int cai(int chao, Stage stage, int cont){
+
+        if(this.getPosY() > chao){
+
+            for (Actor actor : stage.getActors()) {
+                //Se o actor for o Mario
+                if (actor.getX() == this.getPosX() && actor.getY() == this.getPosY()) {
+                    actor.remove();
+                }
+            }
+
+            this.setPosY(this.getPosY() - 3);
+            this.setImg(new Image(new Texture(this.getImgPath())));
+            this.getImg().setPosition(this.getPosX(), this.getPosY());
+            this.getImg().setSize(this.getSizeX(), this.getSizeY());
+            stage.addActor(this.getImg());
+
+            return cont;
+        }else{
+            return -1;
+        }
+    }
+
+    public boolean canMove(String orientacao){
+        if(orientacao.equals("esquerda")){
+            if (this.posX > 39) {
+                return true;
+            }
+        }else if(orientacao.equals("direita")){
+            if(this.posX < 561){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

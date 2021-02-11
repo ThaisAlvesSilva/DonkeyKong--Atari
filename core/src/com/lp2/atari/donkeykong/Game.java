@@ -17,15 +17,20 @@ public class Game extends ApplicationAdapter {
     Objeto escada4;
     Objeto macaco;
     int spriteDonkeyKong, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda;
+    int quedaMarioDireita, quedaMarioEsquerda, quedaMarioDiagonalEsquerda, quedaMarioDiagonalDireita;
     Movel mario;
     Timer timer;
     int pulou;
     boolean entrou1,entrou2, entrou3;
+    boolean caiuDireita, caiuEsquerda, caiuDiagonalEsquerda, caiuDiagonalDireita;
 
     @Override
     public void create() {
+        quedaMarioEsquerda = 0;
         timer = new Timer();
-
+        caiuDireita = false;
+        quedaMarioDireita = 0;
+        caiuEsquerda = false;
         spriteDonkeyKong = 1;
         spritePuloMarioDireita = 0;
         spritePuloMarioEsquerda = 0;
@@ -98,14 +103,21 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void render() {
+
+        System.out.println("X:"+mario.getPosX());
+        System.out.println("Y:"+mario.getPosY());
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
 
-
-
         //o Mário anda pra direita
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && mario.canMove("direita")) {
+
+            if (mario.getPosY() == 136 && mario.getPosX() >= 273 && mario.getPosX() <= 324) {
+                quedaMarioDireita = 1;
+                caiuDireita = true;
+            }
 
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
@@ -117,8 +129,14 @@ public class Game extends ApplicationAdapter {
 			stage.addActor(mario.getImg());
 
         }
+
         //O Mario anda pra esquerda
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && mario.canMove("esquerda")) {
+
+            if (mario.getPosY() == 136 && mario.getPosX() >= 273 && mario.getPosX() <= 324) {
+                quedaMarioEsquerda = 1;
+                caiuEsquerda = true;
+            }
 
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
@@ -175,6 +193,7 @@ public class Game extends ApplicationAdapter {
             entrou1 = false;
         }
 
+        //DiagonalDireita
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !entrou2){
             spritePuloMarioDireita = 1;
             entrou2 = true;
@@ -191,18 +210,23 @@ public class Game extends ApplicationAdapter {
             if(spritePuloMarioDireita <=50){
                 spritePuloMarioDireita++;
                 spritePuloMarioDireita = mario.pularDiagonalDireita(stage, spritePuloMarioDireita);
-
-                System.out.println("_____________2: "+ spritePuloMarioDireita +"_____________");
             }
 
         }
         else if(spritePuloMarioDireita == -1){
+
+            if (mario.getPosX() >= 273 && mario.getPosX() <= 324) {
+                quedaMarioDiagonalEsquerda = 1;
+                caiuDiagonalEsquerda = true;
+            }
+
             spritePuloMarioDireita = 1;
-            System.out.println("_____________ENTROU: "+entrou2+"_____________");
             entrou2 = false;
         }
 
+        //DiagonalEsquerda
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.LEFT) && !entrou3){
+
             spritePuloMarioEsquerda = 1;
             entrou3 = true;
         }
@@ -217,10 +241,14 @@ public class Game extends ApplicationAdapter {
             spritePuloMarioEsquerda++;
             spritePuloMarioEsquerda = mario.pularDiagonalEsquerda(stage, spritePuloMarioEsquerda);
         }else if(spritePuloMarioEsquerda == -1){
+            if (mario.getPosX() >= 273 && mario.getPosX() <= 324) {
+                quedaMarioDiagonalEsquerda = 1;
+                caiuDiagonalEsquerda = true;
+            }
+
             spritePuloMarioEsquerda =1;
             entrou3 = false;
         }
-
 
         for (Actor actor : stage.getActors()) {
             //Se o actor é o Donkey Kong
@@ -255,6 +283,38 @@ public class Game extends ApplicationAdapter {
 
         if (spriteDonkeyKong == 120) {
             spriteDonkeyKong = 1;
+        }
+
+        if(caiuDireita && quedaMarioDireita > -1){
+            quedaMarioDireita++;
+            quedaMarioDireita = mario.cai(40, stage, quedaMarioDireita);
+        }else if(quedaMarioDireita == -1){
+            quedaMarioDireita = 1;
+            caiuDireita = false;
+        }
+
+        if(caiuEsquerda && quedaMarioEsquerda > -1){
+            quedaMarioEsquerda++;
+            quedaMarioEsquerda = mario.cai(40, stage, quedaMarioEsquerda);
+        }else if(quedaMarioEsquerda == -1){
+            quedaMarioEsquerda = 1;
+            caiuEsquerda = false;
+        }
+
+        if(caiuDiagonalEsquerda && quedaMarioDiagonalEsquerda > -1){
+            quedaMarioDiagonalEsquerda++;
+            quedaMarioDiagonalEsquerda = mario.cai(40, stage, quedaMarioDiagonalEsquerda);
+        }else if(quedaMarioDiagonalEsquerda == -1){
+            quedaMarioDiagonalEsquerda = 1;
+            caiuDiagonalEsquerda = false;
+        }
+
+        if(caiuDiagonalDireita && quedaMarioDiagonalDireita > -1){
+            quedaMarioDiagonalDireita++;
+            quedaMarioDiagonalDireita = mario.cai(40, stage, quedaMarioDiagonalDireita);
+        }else if(quedaMarioDiagonalDireita == -1){
+            quedaMarioDiagonalDireita = 1;
+            caiuDiagonalDireita = false;
         }
 
         stage.act(Gdx.graphics.getDeltaTime());
