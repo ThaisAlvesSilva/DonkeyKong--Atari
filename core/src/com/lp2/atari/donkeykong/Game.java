@@ -14,23 +14,22 @@ public class Game extends ApplicationAdapter {
     Stage stage;
     Objeto plataforma;
     Objeto escada;
-    Objeto escada4;
     Objeto macaco;
+    Objeto princesa;
     int spriteDonkeyKong, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda;
-    int quedaMarioDireita, quedaMarioEsquerda, quedaMarioDiagonalEsquerda, quedaMarioDiagonalDireita;
+    int queda;
     Movel mario;
     Timer timer;
     int pulou;
+    float teste=0;
     boolean entrou1,entrou2, entrou3;
-    boolean caiuDireita, caiuEsquerda, caiuDiagonalEsquerda, caiuDiagonalDireita;
+    boolean caiu;
 
     @Override
     public void create() {
-        quedaMarioEsquerda = 0;
+        queda= 0;
         timer = new Timer();
-        caiuDireita = false;
-        quedaMarioDireita = 0;
-        caiuEsquerda = false;
+        caiu = false;
         spriteDonkeyKong = 1;
         spritePuloMarioDireita = 0;
         spritePuloMarioEsquerda = 0;
@@ -99,6 +98,10 @@ public class Game extends ApplicationAdapter {
         //Mario
         mario = new Movel("mario_2_1.png", 60, 40, 30, 26, 0, 0);
         stage.addActor(mario.getImg());
+
+        //Princesa
+        princesa = new Objeto("princesa_1.png",150,420, 30,26);
+        stage.addActor(princesa.getImg());
     }
 
     @Override
@@ -111,13 +114,21 @@ public class Game extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
 
+        //verifica se o mario está em cima de algum buraco
+        cair();
+
+        //se o mario estiver em cima do buraco, ele cai
+        if(caiu && queda > -1){
+            queda++;
+            queda = mario.cai(teste, stage, queda);
+        }else if(queda == -1){
+            queda = 1;
+            caiu = false;
+        }
+
+
         //o Mário anda pra direita
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && mario.canMove("direita")) {
-
-            if (mario.getPosY() == 136 && mario.getPosX() >= 273 && mario.getPosX() <= 324) {
-                quedaMarioDireita = 1;
-                caiuDireita = true;
-            }
 
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
@@ -127,16 +138,10 @@ public class Game extends ApplicationAdapter {
             }
 			andarDireita();
 			stage.addActor(mario.getImg());
-
         }
 
         //O Mario anda pra esquerda
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && mario.canMove("esquerda")) {
-
-            if (mario.getPosY() == 136 && mario.getPosX() >= 273 && mario.getPosX() <= 324) {
-                quedaMarioEsquerda = 1;
-                caiuEsquerda = true;
-            }
 
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
@@ -150,14 +155,12 @@ public class Game extends ApplicationAdapter {
         //o mario sobe as escadas
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
 
-
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
                 if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
                     actor.remove();
                 }
             }
-
             subiuEscada();
 			stage.addActor(mario.getImg());
         }
@@ -174,6 +177,7 @@ public class Game extends ApplicationAdapter {
 			stage.addActor(mario.getImg());
         }
 
+        //Pula no eixo Y
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !entrou1){
            spritePuloMarioY = 0;
            entrou1 = true;
@@ -193,14 +197,13 @@ public class Game extends ApplicationAdapter {
             entrou1 = false;
         }
 
-        //DiagonalDireita
+        //Pula em parabola para a direita
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !entrou2){
             spritePuloMarioDireita = 1;
             entrou2 = true;
         }
 
         if(entrou2 && spritePuloMarioDireita > -1){
-            System.out.println("_____________1:"+ spritePuloMarioDireita +"_____________");
             for (Actor actor : stage.getActors()) {
                 //Se é o Mario
                 if (actor.getX() == mario.getPosX() && actor.getY() == mario.getPosY()) {
@@ -212,19 +215,13 @@ public class Game extends ApplicationAdapter {
                 spritePuloMarioDireita = mario.pularDiagonalDireita(stage, spritePuloMarioDireita);
             }
 
-        }
-        else if(spritePuloMarioDireita == -1){
-
-            if (mario.getPosX() >= 273 && mario.getPosX() <= 324) {
-                quedaMarioDiagonalEsquerda = 1;
-                caiuDiagonalEsquerda = true;
-            }
+        } else if(spritePuloMarioDireita == -1){
 
             spritePuloMarioDireita = 1;
             entrou2 = false;
         }
 
-        //DiagonalEsquerda
+        //Pula em parabola para a esquerda
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && Gdx.input.isKeyPressed(Input.Keys.LEFT) && !entrou3){
 
             spritePuloMarioEsquerda = 1;
@@ -238,21 +235,26 @@ public class Game extends ApplicationAdapter {
                     actor.remove();
                 }
             }
-            spritePuloMarioEsquerda++;
-            spritePuloMarioEsquerda = mario.pularDiagonalEsquerda(stage, spritePuloMarioEsquerda);
-        }else if(spritePuloMarioEsquerda == -1){
-            if (mario.getPosX() >= 273 && mario.getPosX() <= 324) {
-                quedaMarioDiagonalEsquerda = 1;
-                caiuDiagonalEsquerda = true;
+            if(spritePuloMarioDireita <=50) {
+                spritePuloMarioEsquerda++;
+                spritePuloMarioEsquerda = mario.pularDiagonalEsquerda(stage, spritePuloMarioEsquerda);
             }
-
+        }else if(spritePuloMarioEsquerda == -1){
             spritePuloMarioEsquerda =1;
             entrou3 = false;
         }
 
+        //Tira a imagem do Donkey Kong
         for (Actor actor : stage.getActors()) {
             //Se o actor é o Donkey Kong
             if (actor.getX() == macaco.getPosX() && actor.getY() == macaco.getPosY()) {
+                actor.remove();
+            }
+        }
+        //Tira a imagem da princesa
+        for (Actor actor : stage.getActors()) {
+            //Se o actor é o Donkey Kong
+            if (actor.getX() == princesa.getPosX() && actor.getY() == princesa.getPosY()) {
                 actor.remove();
             }
         }
@@ -269,53 +271,24 @@ public class Game extends ApplicationAdapter {
          Thread.currentThread().interrupt();
          }**/
 
+        //Troca a imagem do Donkey e da princesa
         if (spriteDonkeyKong <= 60) {
             //Donkey Kong
             macaco = new Objeto("donkey_kong_" + 1 + ".png", 60, 420, 50, 50);
             stage.addActor(macaco.getImg());
+            princesa = new Objeto("princesa_" + 1 + ".png", 150,420, 30,26);
+            stage.addActor(princesa.getImg());
             spriteDonkeyKong++;
         } else if (spriteDonkeyKong <= 120) {
             //Donkey Kong
             macaco = new Objeto("donkey_kong_" + 2 + ".png", 60, 420, 50, 50);
             stage.addActor(macaco.getImg());
+            princesa = new Objeto("princesa_" + 2 + ".png", 150,420, 30,26);
+            stage.addActor(princesa.getImg());
             spriteDonkeyKong++;
         }
-
         if (spriteDonkeyKong == 120) {
             spriteDonkeyKong = 1;
-        }
-
-        if(caiuDireita && quedaMarioDireita > -1){
-            quedaMarioDireita++;
-            quedaMarioDireita = mario.cai(40, stage, quedaMarioDireita);
-        }else if(quedaMarioDireita == -1){
-            quedaMarioDireita = 1;
-            caiuDireita = false;
-        }
-
-        if(caiuEsquerda && quedaMarioEsquerda > -1){
-            quedaMarioEsquerda++;
-            quedaMarioEsquerda = mario.cai(40, stage, quedaMarioEsquerda);
-        }else if(quedaMarioEsquerda == -1){
-            quedaMarioEsquerda = 1;
-            caiuEsquerda = false;
-        }
-
-        if(caiuDiagonalEsquerda && quedaMarioDiagonalEsquerda > -1){
-            quedaMarioDiagonalEsquerda++;
-            quedaMarioDiagonalEsquerda = mario.cai(40, stage, quedaMarioDiagonalEsquerda);
-        }else if(quedaMarioDiagonalEsquerda == -1){
-            quedaMarioDiagonalEsquerda = 1;
-            caiuDiagonalEsquerda = false;
-        }
-
-        if(caiuDiagonalDireita && quedaMarioDiagonalDireita > -1){
-            quedaMarioDiagonalDireita++;
-            quedaMarioDiagonalDireita = mario.cai(40, stage, quedaMarioDiagonalDireita);
-        }else if(quedaMarioDiagonalDireita == -1){
-            quedaMarioDiagonalDireita = 1;
-            caiuDiagonalDireita = false;
-            System.out.println("godgod");
         }
 
         stage.act(Gdx.graphics.getDeltaTime());
@@ -323,19 +296,46 @@ public class Game extends ApplicationAdapter {
         batch.end();
     }
 
+    public void cair(){
+        //Caso o mario passe por cima do primeiro buraco
+        if (mario.getPosY() == 136 && mario.getPosX() >= 273 && mario.getPosX() <= 324) {
+            queda = 1;
+            caiu = true;
+            teste = (mario.getPosY()-96);
+        }
+        //Caso o mario passe por cima do segundo buraco
+        if (mario.getPosY() == 232 && mario.getPosX() >=  87  && mario.getPosX() <= 144) {
+            queda = 1;
+            caiu = true;
+            teste = (mario.getPosY()-96);
+        }
+        //Caso o mario passe por cima do terceiro buraco
+        if (mario.getPosY() == 232 && mario.getPosX() >= 441 && mario.getPosX() <= 495) {
+            queda = 1;
+            caiu = true;
+            teste = (mario.getPosY()-96);
+        }
+        //Caso o mario passe por cima do ultimo buraco
+        if (mario.getPosY() == 418 && mario.getPosX() >= 258) {
+            queda = 1;
+            caiu = true;
+            teste = (mario.getPosY()-92);
+        }
+
+    }
     public void desceuEscada() {
         if (mario.getPosY() > 40 && mario.getPosY() <= 136) {
-            if (mario.getPosX() >= 500 && mario.getPosX() <= 540) {
+            if (mario.getPosX() >= 495 && mario.getPosX() <= 522) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
             }
         } else if (mario.getPosY() >= 136 && mario.getPosY() <= 232) {
-            if (mario.getPosX() >= 205 && mario.getPosX() <= 245) {
+            if (mario.getPosX() >= 195 && mario.getPosX() <= 225) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
             }
         } else if (mario.getPosY() >= 232 && mario.getPosY() <= 325) {
-            if (mario.getPosX() >= 545 && mario.getPosX() <= 585) {
+            if (mario.getPosX() >= 537 && mario.getPosX() <= 561) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
             }
@@ -345,7 +345,7 @@ public class Game extends ApplicationAdapter {
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
             }
         } else if (mario.getPosY() >= 418) {
-            if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
+            if (mario.getPosX() >= 213 && mario.getPosX() <= 237) {
 				mario.setPosY(mario.getPosY() - 1);
 				mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
 			}
@@ -354,22 +354,22 @@ public class Game extends ApplicationAdapter {
 
     public void subiuEscada() {
         if (mario.getPosY() < 135) {
-            if (mario.getPosX() >= 500 && mario.getPosX() <= 540) {
+            if (mario.getPosX() >= 495 && mario.getPosX() <= 522) {
                 mario.setPosY(mario.getPosY() + 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
             }
         } else if (mario.getPosY() >= 135 && mario.getPosY() < 230) {
-            if (mario.getPosX() >= 205 && mario.getPosX() <= 245) {
+            if (mario.getPosX() >= 195 && mario.getPosX() <= 225) {
                 mario.setPosY(mario.getPosY() + 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
             }
         } else if (mario.getPosY() >= 230 && mario.getPosY() < 325) {
-            if (mario.getPosX() >= 545 && mario.getPosX() <= 585) {
+            if (mario.getPosX() >= 537 && mario.getPosX() <= 561) {
                 mario.setPosY(mario.getPosY() + 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
             }
         } else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
-            if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
+            if (mario.getPosX() >= 213 && mario.getPosX() <= 237) {
                 mario.setPosY(mario.getPosY() + 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
             }
