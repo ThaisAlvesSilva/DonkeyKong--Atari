@@ -315,6 +315,7 @@ public class Game extends ApplicationAdapter {
         }else if(quedaMarioDiagonalDireita == -1){
             quedaMarioDiagonalDireita = 1;
             caiuDiagonalDireita = false;
+            System.out.println("godgod");
         }
 
         stage.act(Gdx.graphics.getDeltaTime());
