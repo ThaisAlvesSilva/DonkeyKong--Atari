@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Timer;
 import org.graalvm.compiler.lir.amd64.AMD64ControlFlow;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Game extends ApplicationAdapter {
     SpriteBatch batch;
@@ -30,7 +31,7 @@ public class Game extends ApplicationAdapter {
     float teste=0;
     boolean entrou1,entrou2, entrou3, entrouEscada, entrouBuraco, perdeu;
     boolean caiu;
-    ArrayList<Movel> arrayBarril;
+    List<Movel> arrayBarril;
     float tamanho1;
 
 
@@ -325,7 +326,7 @@ public class Game extends ApplicationAdapter {
 
     public void spawnBarril(int i){
 
-            if (arrayBarril.get(i).getPosY() <= 420 && arrayBarril.get(i).getPosY() > 325) {
+            if (arrayBarril.get(i).getPosY()<= 420 && arrayBarril.get(i).getPosY() > 325) {
                 System.out.println("TESTE Forrrrr, getY"+arrayBarril.get(i).getPosY());
                 if (arrayBarril.get(i).getPosX()  <= 258) {
                     removeMovel(arrayBarril.get(i), stageBarril);
@@ -361,7 +362,6 @@ public class Game extends ApplicationAdapter {
                    // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
                     arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
-
                 }
             }
             if (arrayBarril.get(i).getPosY() <= 232 && arrayBarril.get(i).getPosY() > 136) {
@@ -381,7 +381,6 @@ public class Game extends ApplicationAdapter {
                     //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
                     arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
-
                 }
             }
             if (arrayBarril.get(i).getPosY() <= 136 && arrayBarril.get(i).getPosY() > 40) {
@@ -408,7 +407,6 @@ public class Game extends ApplicationAdapter {
                    // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
                     arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
-
                 }
             }
             if (arrayBarril.get(i).getPosY() == 40) {
@@ -425,9 +423,7 @@ public class Game extends ApplicationAdapter {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.remove(i);
                 }
-
             }
-
     }
 
 
