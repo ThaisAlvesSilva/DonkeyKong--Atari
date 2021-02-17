@@ -1,9 +1,10 @@
 package com.lp2.atari.donkeykong;
 
+import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
-public class Objeto {
+public class Objeto extends ApplicationAdapter {
     String imgPath;
     float posX, posY;
     float sizeX, sizeY;
@@ -68,4 +69,6 @@ public class Objeto {
     public void setSizeY(float sizeY) {
         this.sizeY = sizeY;
     }
+
+
 }

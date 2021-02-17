@@ -3,6 +3,8 @@ package com.lp2.atari.donkeykong;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,25 +25,39 @@ public class Game extends ApplicationAdapter {
     Objeto escada;
     Objeto macaco;
     Objeto princesa;
-    int spriteDonkeyKong, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda;
+    int spriteDonkeyKong, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda, contSom, contSomMorte;
     int queda;
     Movel mario;
     Timer timer;
-    int pulou;
+    int pulou,i;
+    boolean cont1,cont2,cont3;
     float teste=0;
-    boolean entrou1,entrou2, entrou3, entrouEscada, entrouBuraco, perdeu;
+    boolean entrou1,entrou2, entrou3, entrouEscada, entrouBuraco, perdeu, testeSom;
     boolean caiu;
     List<Movel> arrayBarril;
     float tamanho1;
-
+    Sound puloSom;
+    Sound andar;
+    Sound morreuSom;
+    public Texture GameOver;
 
 
     @Override
     public void create() {
+
+        puloSom = Gdx.audio.newSound(Gdx.files.internal("Pulo.wav"));
+        andar = Gdx.audio.newSound(Gdx.files.internal("Andar.mp3"));
+        morreuSom = Gdx.audio.newSound(Gdx.files.internal("morreu.mp3"));
+        GameOver = new Texture("gameOver.png");
         arrayBarril = new ArrayList<>();
         queda= 0;
+        i=0;
         timer = new Timer();
         caiu = false;
+        cont1=false;
+        cont2=false;
+        cont3=false;
+        testeSom = false;
         tamanho1 = 0;
         spriteDonkeyKong = 1;
         spritePuloMarioDireita = 0;
@@ -57,6 +73,7 @@ public class Game extends ApplicationAdapter {
         stage = new Stage();
         stageBarril = new Stage();
         perdeu =false;
+        contSom=0;
 
         //Dados da plataforma 1
         plataforma = new Objeto("plataforma_1_buraco.png", 40, 385, 222.218f, 40);
@@ -126,17 +143,28 @@ public class Game extends ApplicationAdapter {
     @Override
     public void render() {
 
+
         //Reinicializa a variavel com falso
         entrouBuraco=false;
-
-        System.out.println("X:"+mario.getPosX());
-        System.out.println("Y:"+mario.getPosY());
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
 
-        moveBarril();
+        i = moveBarril();
+        if(i==1){
+            dispose();
+            Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            //colocar a imagem de gameover aqui
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    Gdx.app.exit();
+                }
+            }, 12);
+        }
+
         cair();
 
         //Caso ele esteja nas plataformas, atualiza a variavel que ele não está na escada e poderá pular
@@ -160,13 +188,16 @@ public class Game extends ApplicationAdapter {
             removeMovel(mario,stage);
 			andarMario(true);
 			stage.addActor(mario.getImg());
+            contSom++;
+			contSom = mario.andaSom(contSom, andar);
         }
-
         //O Mario anda pra esquerda
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && mario.canMove("esquerda")) {
             removeMovel(mario,stage);
             andarMario(false);
 			stage.addActor(mario.getImg());
+            contSom++;
+            contSom = mario.andaSom(contSom, andar);
         }
         //o mario sobe as escadas
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
@@ -174,6 +205,9 @@ public class Game extends ApplicationAdapter {
             entrouEscada=true;
             subiuEscada();
 			stage.addActor(mario.getImg());
+            contSom++;
+            contSom = mario.andaSom(contSom, andar);
+
         }
 
         //o mario desce as escadas
@@ -182,6 +216,8 @@ public class Game extends ApplicationAdapter {
             entrouEscada=true;
             desceuEscada();
 			stage.addActor(mario.getImg());
+            contSom++;
+            contSom = mario.andaSom(contSom, andar);
         }
 
         //Pula no eixo Y
@@ -189,6 +225,7 @@ public class Game extends ApplicationAdapter {
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !entrou1 && !entrouEscada && !entrouBuraco){
            spritePuloMarioY = 0;
            entrou1 = true;
+           puloSom.play();
         }
 
         if(entrou1 && spritePuloMarioY > -1){
@@ -292,26 +329,43 @@ public class Game extends ApplicationAdapter {
         batch.end();
     }
 
-    public void moveBarril(){
-        for(int i=0; i<arrayBarril.size();i++){
-            tamanho1 = arrayBarril.get(i).sizeX/2;
-            if(mario.getPosY()==418 && arrayBarril.get(i).getPosY()==420){
-                if(mario.getPosX()<=(arrayBarril.get(i).getPosX()+tamanho1) && mario.getPosX()>=(arrayBarril.get(i).getPosX()-tamanho1) ){
-                    System.out.println("O CODIGO TA CABEÇA E NÃO USOU FISICA");
-                    Gdx.app.exit();
+    public int moveBarril() {
+
+        for (int i = 0; i < arrayBarril.size(); i++) {
+            tamanho1 = arrayBarril.get(i).sizeX / 2;
+            if (mario.getPosY() == 418 && arrayBarril.get(i).getPosY() == 420) {
+                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho1) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho1) && !cont1) {
+                    cont1 = true;
+                    if (cont1) {
+                        morreuSom.play();
+                        return 1;
+                    }
                 }
             }
-            if(mario.getPosY()==325 && arrayBarril.get(i).getPosY()==324){
-                if(mario.getPosX()<=(arrayBarril.get(i).getPosX()+tamanho1) && mario.getPosX()>=(arrayBarril.get(i).getPosX()-tamanho1) ){
-                    System.out.println("O CODIGO TA CABEÇA E NÃO USOU FISICA");
-                    Gdx.app.exit();
+            if (mario.getPosY() == 325 && arrayBarril.get(i).getPosY() == 324) {
+                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho1) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho1) && !cont2) {
+                    cont2 = true;
+                    System.out.println("contador:" + cont2);
+                    if (cont2) {
+                        morreuSom.play();
+                        return 1;
+                    }
                 }
-            }else if(mario.getPosX()<=(arrayBarril.get(i).getPosX()+tamanho1) && mario.getPosX()>=(arrayBarril.get(i).getPosX()-tamanho1) && mario.getPosY()== arrayBarril.get(i).getPosY()){
-                System.out.println("O CODIGO TA CABEÇA E NÃO USOU FISICA");
-                Gdx.app.exit();
+            }
+            if (mario.getPosY() == arrayBarril.get(i).getPosY()) {
+                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho1) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho1) && !cont3) {
+                    cont3 = true;
+                    System.out.println("contador:" + cont3);
+                    if (cont3) {
+                        morreuSom.play();
+                        return 1;
+                    }
+                }
             }
             spawnBarril(i);
+
         }
+        return 0;
     }
 
 
@@ -327,7 +381,7 @@ public class Game extends ApplicationAdapter {
     public void spawnBarril(int i){
 
             if (arrayBarril.get(i).getPosY()<= 420 && arrayBarril.get(i).getPosY() > 325) {
-                System.out.println("TESTE Forrrrr, getY"+arrayBarril.get(i).getPosY());
+
                 if (arrayBarril.get(i).getPosX()  <= 258) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()+3);
@@ -346,7 +400,7 @@ public class Game extends ApplicationAdapter {
                 }
             }
             if (arrayBarril.get(i).getPosY()<= 325 && arrayBarril.get(i).getPosY()  > 232) {
-                System.out.println("TESTE Forrrrr, getY"+arrayBarril.get(i).getPosY());
+
                 if (arrayBarril.get(i).getPosX() <= 534) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()+3);
@@ -365,7 +419,7 @@ public class Game extends ApplicationAdapter {
                 }
             }
             if (arrayBarril.get(i).getPosY() <= 232 && arrayBarril.get(i).getPosY() > 136) {
-                System.out.println("TESTE Forrrrr, getY"+arrayBarril.get(i).getPosY());
+
                 if (arrayBarril.get(i).getPosX() >= 495) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()-3);
@@ -384,7 +438,7 @@ public class Game extends ApplicationAdapter {
                 }
             }
             if (arrayBarril.get(i).getPosY() <= 136 && arrayBarril.get(i).getPosY() > 40) {
-                System.out.println("TESTE Forrrrr, getY"+arrayBarril.get(i).getPosY());
+
                 if (arrayBarril.get(i).getPosX() >= 324) {
 
                     if(arrayBarril.get(i).getPosX()==483){
@@ -398,7 +452,7 @@ public class Game extends ApplicationAdapter {
                    // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
                     arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
-                    System.out.println("TAMANHO DO ARRAY:::"+arrayBarril.size());
+
 
                 } else if (arrayBarril.get(i).getPosX() < 324) {
                     removeMovel(arrayBarril.get(i), stageBarril);
@@ -410,16 +464,15 @@ public class Game extends ApplicationAdapter {
                 }
             }
             if (arrayBarril.get(i).getPosY() == 40) {
-                System.out.println("TESTE Forrrrr, getY"+arrayBarril.get(i).getPosY());
+
                 if (arrayBarril.get(i).getPosX() > 39) {
                     removeMovel(arrayBarril.get(i), stageBarril);
-                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()-2);
+                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()-3);
                     //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
                     arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
                 }
                 if (arrayBarril.get(i).getPosX() == 39) {
-                    System.out.println("TESTE Forrrrr, getX"+arrayBarril.get(i).getPosX());
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.remove(i);
                 }
@@ -460,27 +513,38 @@ public class Game extends ApplicationAdapter {
             if (mario.getPosX() >= 495 && mario.getPosX() <= 522) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                contSom++;
+                contSom = mario.andaSom(contSom, andar);
             }
+
         } else if (mario.getPosY() >= 136 && mario.getPosY() <= 232) {
             if (mario.getPosX() >= 195 && mario.getPosX() <= 225) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                contSom++;
+                contSom = mario.andaSom(contSom, andar);
             }
         } else if (mario.getPosY() >= 232 && mario.getPosY() <= 325) {
             if (mario.getPosX() >= 537 && mario.getPosX() <= 561) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                contSom++;
+                contSom = mario.andaSom(contSom, andar);
             }
         } else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
             if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
                 mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                contSom++;
+                contSom = mario.andaSom(contSom, andar);
             }
         } else if (mario.getPosY() >= 418) {
             if (mario.getPosX() >= 213 && mario.getPosX() <= 237) {
 				mario.setPosY(mario.getPosY() - 1);
 				mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
-			}
+                contSom++;
+                contSom = mario.andaSom(contSom, andar);
+            }
         }
     }
 
@@ -559,11 +623,16 @@ public class Game extends ApplicationAdapter {
 	}
 
 
-
-
-
     @Override
     public void dispose() {
         batch.dispose();
+       // morreuSom.dispose();
+        puloSom.dispose();
+        andar.dispose();
+        stage.dispose();
+        princesa.dispose();
+        mario.dispose();
+        macaco.dispose();
+        stageBarril.dispose();
     }
 }

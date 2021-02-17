@@ -1,5 +1,6 @@
 package com.lp2.atari.donkeykong;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -153,7 +154,6 @@ public class Movel extends Objeto{
                 }
             }
 
-            System.out.println("chao:::::::" + chao);
             this.setPosY(this.getPosY() - 3);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
@@ -182,10 +182,23 @@ public class Movel extends Objeto{
         return false;
     }
 
+    public int andaSom(int cont, Sound som){
+        if (cont == 10) {
+            som.play();
+        }
+        else if(cont >20){
+            som.pause();
+            cont = 0;
+        }
+        return cont;
+    }
     @Override
     public String toString() {
         return "Movel{" +
                 "posX=" + posX +
                 '}';
     }
+
+
+
 }
