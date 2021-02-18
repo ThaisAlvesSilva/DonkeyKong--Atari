@@ -3,16 +3,13 @@ package com.lp2.atari.donkeykong;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Timer;
-import org.graalvm.compiler.lir.amd64.AMD64ControlFlow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,45 +22,40 @@ public class Game extends ApplicationAdapter {
     Objeto escada;
     Objeto macaco;
     Objeto princesa;
-    int spriteDonkeyKong, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda, contSom, contSomMorte;
+    int spriteDonkeyPrincess, spritePuloMarioDireita, spritePuloMarioY, spritePuloMarioEsquerda, contSom;
     int queda;
     Movel mario;
-    Timer timer;
-    int pulou,i;
-    boolean cont1,cont2,cont3;
+    int perdeu, ganhou;
+    boolean cont1,cont2,cont3,contGanhou;
     float teste=0;
-    boolean entrou1,entrou2, entrou3, entrouEscada, entrouBuraco, perdeu, testeSom;
+    boolean entrou1,entrou2, entrou3, entrouEscada, entrouBuraco;
     boolean caiu;
     List<Movel> arrayBarril;
-    float tamanho1;
+    float tamanho;
     Sound puloSom;
-    Sound andar;
-    Sound morreuSom;
-    public Texture GameOver;
+    Sound walkSom;
+    Sound morreuSom,ganhouSom;
+    public Texture gameOver;
+    public Texture youWin;
 
 
     @Override
     public void create() {
 
-        puloSom = Gdx.audio.newSound(Gdx.files.internal("Pulo.wav"));
-        andar = Gdx.audio.newSound(Gdx.files.internal("Andar.mp3"));
-        morreuSom = Gdx.audio.newSound(Gdx.files.internal("morreu.mp3"));
-        GameOver = new Texture("gameOver.png");
         arrayBarril = new ArrayList<>();
         queda= 0;
-        i=0;
-        timer = new Timer();
+        perdeu =0;
+        ganhou=0;
         caiu = false;
         cont1=false;
         cont2=false;
         cont3=false;
-        testeSom = false;
-        tamanho1 = 0;
-        spriteDonkeyKong = 1;
+        contGanhou=false;
+        tamanho = 0;
+        spriteDonkeyPrincess = 1;
         spritePuloMarioDireita = 0;
         spritePuloMarioEsquerda = 0;
         spritePuloMarioY = 0;
-        pulou = 0;
         entrou1 = false;
         entrou2 = false;
         entrou3 = false;
@@ -72,8 +64,25 @@ public class Game extends ApplicationAdapter {
         batch = new SpriteBatch();
         stage = new Stage();
         stageBarril = new Stage();
-        perdeu =false;
         contSom=0;
+
+        //Som do pulo
+        puloSom = Gdx.audio.newSound(Gdx.files.internal("Pulo.wav"));
+
+        //Som dos passos
+        walkSom = Gdx.audio.newSound(Gdx.files.internal("Andar.mp3"));
+
+        //Som quando perde
+        morreuSom = Gdx.audio.newSound(Gdx.files.internal("morreu.mp3"));
+
+        //Som quando ganha
+        ganhouSom = Gdx.audio.newSound(Gdx.files.internal("Ganhou.mp3"));
+
+        //Imagem de game over
+        gameOver = new Texture("GameOver.png");
+
+        //Imagem de You Win
+        youWin = new Texture("YouWin.png");
 
         //Dados da plataforma 1
         plataforma = new Objeto("plataforma_1_buraco.png", 40, 385, 222.218f, 40);
@@ -135,6 +144,7 @@ public class Game extends ApplicationAdapter {
         princesa = new Objeto("princesa_1.png",150,420, 30,26);
         stage.addActor(princesa.getImg());
 
+        //Printando o primeiro barril
        arrayBarril.add(new Movel("barril_1.png", 180, 420, 20,20, 0,0));
        stageBarril.addActor(arrayBarril.get(0).getImg());
 
@@ -143,7 +153,6 @@ public class Game extends ApplicationAdapter {
     @Override
     public void render() {
 
-
         //Reinicializa a variavel com falso
         entrouBuraco=false;
 
@@ -151,26 +160,19 @@ public class Game extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
 
-        i = moveBarril();
-        if(i==1){
-            dispose();
-            Gdx.gl.glClearColor(0, 0, 0.2f, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-            //colocar a imagem de gameover aqui
-            Timer.schedule(new Timer.Task() {
-                @Override
-                public void run() {
-                    Gdx.app.exit();
-                }
-            }, 12);
-        }
+        //Se ele o i=1, é porque o mario se chocou com o barril
+        //Se
+        if(perdeu !=1) perdeu = confereBarril();
+        else if(ganhou !=1) ganhou = confereBarril();
 
+        //Confere se o mario esta em cima de algum buraco
         cair();
 
         //Caso ele esteja nas plataformas, atualiza a variavel que ele não está na escada e poderá pular
         if(mario.getPosY()==40 || mario.getPosY()==136 || mario.getPosY()==232 || mario.getPosY()==325 || mario.getPosY()==418) {
             entrouEscada = false;
         }
+
         //se o mario estiver em cima do buraco, ele cai
         if(caiu && queda > -1){
             queda++;
@@ -182,23 +184,24 @@ public class Game extends ApplicationAdapter {
             caiu = false;
         }
 
-
         //o Mário anda pra direita
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && mario.canMove("direita")) {
             removeMovel(mario,stage);
 			andarMario(true);
 			stage.addActor(mario.getImg());
             contSom++;
-			contSom = mario.andaSom(contSom, andar);
+			contSom = mario.andaSom(contSom, walkSom);
         }
+
         //O Mario anda pra esquerda
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && mario.canMove("esquerda")) {
             removeMovel(mario,stage);
             andarMario(false);
 			stage.addActor(mario.getImg());
             contSom++;
-            contSom = mario.andaSom(contSom, andar);
+            contSom = mario.andaSom(contSom, walkSom);
         }
+
         //o mario sobe as escadas
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             removeMovel(mario,stage);
@@ -206,8 +209,7 @@ public class Game extends ApplicationAdapter {
             subiuEscada();
 			stage.addActor(mario.getImg());
             contSom++;
-            contSom = mario.andaSom(contSom, andar);
-
+            contSom = mario.andaSom(contSom, walkSom);
         }
 
         //o mario desce as escadas
@@ -217,7 +219,7 @@ public class Game extends ApplicationAdapter {
             desceuEscada();
 			stage.addActor(mario.getImg());
             contSom++;
-            contSom = mario.andaSom(contSom, andar);
+            contSom = mario.andaSom(contSom, walkSom);
         }
 
         //Pula no eixo Y
@@ -227,16 +229,15 @@ public class Game extends ApplicationAdapter {
            entrou1 = true;
            puloSom.play();
         }
+            if(entrou1 && spritePuloMarioY > -1){
+                removeMovel(mario,stage);
+                spritePuloMarioY++;
+                spritePuloMarioY = mario.pularY(stage, spritePuloMarioY);
 
-        if(entrou1 && spritePuloMarioY > -1){
-            removeMovel(mario,stage);
-            spritePuloMarioY++;
-            spritePuloMarioY = mario.pularY(stage, spritePuloMarioY);
-
-        }else if(spritePuloMarioY == -1){
-            spritePuloMarioY = 0;
-            entrou1 = false;
-        }
+            }else if(spritePuloMarioY == -1){
+                spritePuloMarioY = 0;
+                entrou1 = false;
+            }
 
         //Pula em parabola para a direita
         //Só pode pular caso não esteja no buraco e na escada
@@ -244,18 +245,17 @@ public class Game extends ApplicationAdapter {
             spritePuloMarioDireita = 1;
             entrou2 = true;
         }
+            if(entrou2 && spritePuloMarioDireita > -1 ){
+                removeMovel(mario,stage);
+                if(spritePuloMarioDireita <=50){
+                        spritePuloMarioDireita++;
+                        spritePuloMarioDireita = mario.pularDiagonalDireita(stage, spritePuloMarioDireita);
+                }
 
-        if(entrou2 && spritePuloMarioDireita > -1 ){
-            removeMovel(mario,stage);
-            if(spritePuloMarioDireita <=50){
-                    spritePuloMarioDireita++;
-                    spritePuloMarioDireita = mario.pularDiagonalDireita(stage, spritePuloMarioDireita);
+            } else if(spritePuloMarioDireita == -1){
+                spritePuloMarioDireita = 1;
+                entrou2 = false;
             }
-
-        } else if(spritePuloMarioDireita == -1){
-            spritePuloMarioDireita = 1;
-            entrou2 = false;
-        }
 
         //Pula em parabola para a esquerda
         //Só pode pular caso não esteja no buraco e na escada
@@ -263,17 +263,16 @@ public class Game extends ApplicationAdapter {
             spritePuloMarioEsquerda = 1;
             entrou3 = true;
         }
-
-        if(entrou3 && spritePuloMarioEsquerda> -1){
-            removeMovel(mario,stage);
-            if(spritePuloMarioDireita <=50) {
-                spritePuloMarioEsquerda++;
-                spritePuloMarioEsquerda = mario.pularDiagonalEsquerda(stage, spritePuloMarioEsquerda);
+            if(entrou3 && spritePuloMarioEsquerda> -1){
+                removeMovel(mario,stage);
+                if(spritePuloMarioDireita <=50) {
+                    spritePuloMarioEsquerda++;
+                    spritePuloMarioEsquerda = mario.pularDiagonalEsquerda(stage, spritePuloMarioEsquerda);
+                }
+            }else if(spritePuloMarioEsquerda == -1){
+                spritePuloMarioEsquerda =1;
+                entrou3 = false;
             }
-        }else if(spritePuloMarioEsquerda == -1){
-            spritePuloMarioEsquerda =1;
-            entrou3 = false;
-        }
 
         //Tira a imagem do Donkey Kong
         for (Actor actor : stage.getActors()) {
@@ -284,57 +283,93 @@ public class Game extends ApplicationAdapter {
         }
         //Tira a imagem da princesa
         for (Actor actor : stage.getActors()) {
-            //Se o actor é o Donkey Kong
+            //Se o actor é a princesa
             if (actor.getX() == princesa.getPosX() && actor.getY() == princesa.getPosY()) {
                 actor.remove();
             }
         }
 
-        /**if(spriteDonkeyKong > 2){
-         spriteDonkeyKong = 1;
-         }**/
-
-        /**Delay em milisegundos
-         try {
-         Thread.sleep(666);
-         }
-         catch(InterruptedException ex) {
-         Thread.currentThread().interrupt();
-         }**/
-
         //Troca a imagem do Donkey e da princesa
-        if (spriteDonkeyKong <= 60) {
-            //Donkey Kong
+        if (spriteDonkeyPrincess <= 60 && !cont3 && !cont2 & !cont1) {
+            //o donkey e a princesa mudam juntos para a direita
             macaco = new Objeto("donkey_kong_" + 1 + ".png", 60, 420, 50, 50);
             stage.addActor(macaco.getImg());
             princesa = new Objeto("princesa_" + 1 + ".png", 150,420, 30,26);
             stage.addActor(princesa.getImg());
-            spriteDonkeyKong++;
-        } else if (spriteDonkeyKong <= 120) {
-            //Donkey Kong
+            spriteDonkeyPrincess++;
+        }
+        else if (spriteDonkeyPrincess <= 120 && !cont3 && !cont2 & !cont1) {
+            //o donkey e a princesa mudam juntos para a esquerda
             macaco = new Objeto("donkey_kong_" + 2 + ".png", 60, 420, 50, 50);
             stage.addActor(macaco.getImg());
             princesa = new Objeto("princesa_" + 2 + ".png", 150,420, 30,26);
             stage.addActor(princesa.getImg());
-            spriteDonkeyKong++;
+            spriteDonkeyPrincess++;
         }
-        if (spriteDonkeyKong == 120) {
-            spriteDonkeyKong = 1;
+        if (spriteDonkeyPrincess == 120) {
+            spriteDonkeyPrincess = 1;
         }
 
-        stage.act(Gdx.graphics.getDeltaTime());
-        stageBarril.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
-        stageBarril.draw();
-        batch.end();
+        //Se ele perdeu
+        if(perdeu ==1 && ganhou == 0){
+            //faz o mario esperar com o barril em cima dele
+            try {
+                Thread.sleep(400);
+            }
+            catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            dispose();
+            //abre o batch para desenhar o game over
+            batch.begin();
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            batch.draw(gameOver, 60, 100);
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    Gdx.app.exit();
+                }
+            }, 2);
+            batch.end();
+        }
+        //Se ele ganhou
+        else if(ganhou ==1 && perdeu==0){
+            try {
+                Thread.sleep(400);
+            }
+            catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            dispose();
+            //abre o batch para desenhar a imagem de venceu
+            batch.begin();
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            batch.draw(youWin, 60, 20);
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    Gdx.app.exit();
+                }
+            }, 2);
+            batch.end();
+        }
+        else{
+            stage.act(Gdx.graphics.getDeltaTime());
+            stageBarril.act(Gdx.graphics.getDeltaTime());
+            stage.draw();
+            stageBarril.draw();
+            batch.end();
+        }
     }
 
-    public int moveBarril() {
-
+    public int confereBarril(){
+        //confere se o barril encostou no mario e retorna 1 caso seja verdadeiro
         for (int i = 0; i < arrayBarril.size(); i++) {
-            tamanho1 = arrayBarril.get(i).sizeX / 2;
+            tamanho = arrayBarril.get(i).sizeX / 2;
             if (mario.getPosY() == 418 && arrayBarril.get(i).getPosY() == 420) {
-                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho1) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho1) && !cont1) {
+                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho) && !cont1) {
                     cont1 = true;
                     if (cont1) {
                         morreuSom.play();
@@ -343,9 +378,8 @@ public class Game extends ApplicationAdapter {
                 }
             }
             if (mario.getPosY() == 325 && arrayBarril.get(i).getPosY() == 324) {
-                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho1) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho1) && !cont2) {
+                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho) && !cont2) {
                     cont2 = true;
-                    System.out.println("contador:" + cont2);
                     if (cont2) {
                         morreuSom.play();
                         return 1;
@@ -353,9 +387,8 @@ public class Game extends ApplicationAdapter {
                 }
             }
             if (mario.getPosY() == arrayBarril.get(i).getPosY()) {
-                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho1) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho1) && !cont3) {
+                if (mario.getPosX() <= (arrayBarril.get(i).getPosX() + tamanho) && mario.getPosX() >= (arrayBarril.get(i).getPosX() - tamanho) && !cont3) {
                     cont3 = true;
-                    System.out.println("contador:" + cont3);
                     if (cont3) {
                         morreuSom.play();
                         return 1;
@@ -379,97 +412,86 @@ public class Game extends ApplicationAdapter {
     }
 
     public void spawnBarril(int i){
-
-            if (arrayBarril.get(i).getPosY()<= 420 && arrayBarril.get(i).getPosY() > 325) {
-
-                if (arrayBarril.get(i).getPosX()  <= 258) {
+        if(!cont3 && !cont2 & !cont1) {
+            if (arrayBarril.get(i).getPosY() <= 420 && arrayBarril.get(i).getPosY() > 325) {
+                if (arrayBarril.get(i).getPosX() <= 258) {
                     removeMovel(arrayBarril.get(i), stageBarril);
-                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()+3);
+                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX() + 3);
                     arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY());
                     //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
 
-                } else if (arrayBarril.get(i).getPosX()> 258) {
+                } else if (arrayBarril.get(i).getPosX() > 258) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX());
-                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY()-2);
+                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY() - 2);
                     //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
                 }
             }
-            if (arrayBarril.get(i).getPosY()<= 325 && arrayBarril.get(i).getPosY()  > 232) {
-
+            if (arrayBarril.get(i).getPosY() <= 325 && arrayBarril.get(i).getPosY() > 232) {
                 if (arrayBarril.get(i).getPosX() <= 534) {
                     removeMovel(arrayBarril.get(i), stageBarril);
-                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()+3);
+                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX() + 3);
                     arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY());
                     //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
 
                 } else if (arrayBarril.get(i).getPosX() > 534) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX());
-                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY()-2);
-                   // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY() - 2);
+                    // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
                 }
             }
             if (arrayBarril.get(i).getPosY() <= 232 && arrayBarril.get(i).getPosY() > 136) {
-
                 if (arrayBarril.get(i).getPosX() >= 495) {
                     removeMovel(arrayBarril.get(i), stageBarril);
-                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()-3);
+                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX() - 3);
                     arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY());
-                    //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
 
                 } else if (arrayBarril.get(i).getPosX() < 495) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX());
-                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY()-2);
-                    //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY() - 2);
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
                 }
             }
             if (arrayBarril.get(i).getPosY() <= 136 && arrayBarril.get(i).getPosY() > 40) {
 
                 if (arrayBarril.get(i).getPosX() >= 324) {
-
-                    if(arrayBarril.get(i).getPosX()==483){
-                        arrayBarril.add(new Movel("barril_1.png", 180, 420, 20,20, 0,0));
-                        stageBarril.addActor(arrayBarril.get(i+1).getImg());
+                    if (arrayBarril.get(i).getPosX() == 483) {
+                        arrayBarril.add(new Movel("barril_1.png", 180, 420, 20, 20, 0, 0));
+                        stageBarril.addActor(arrayBarril.get(i + 1).getImg());
                     }
                     removeMovel(arrayBarril.get(i), stageBarril);
 
-                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()-3);
+                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX() - 3);
                     arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY());
-                   // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
-
 
                 } else if (arrayBarril.get(i).getPosX() < 324) {
                     removeMovel(arrayBarril.get(i), stageBarril);
                     arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX());
-                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY()-2);
-                   // arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).setPosY(arrayBarril.get(i).getPosY() - 2);
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
                 }
             }
             if (arrayBarril.get(i).getPosY() == 40) {
-
                 if (arrayBarril.get(i).getPosX() > 39) {
                     removeMovel(arrayBarril.get(i), stageBarril);
-                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX()-3);
-                    //arrayBarril.get(i).setImg(new Image(new Texture("barril_1.png")));
-                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(),arrayBarril.get(i).getPosY());
+                    arrayBarril.get(i).setPosX(arrayBarril.get(i).getPosX() - 3);
+                    arrayBarril.get(i).getImg().setPosition(arrayBarril.get(i).getPosX(), arrayBarril.get(i).getPosY());
                     stageBarril.addActor(arrayBarril.get(i).getImg());
                 }
                 if (arrayBarril.get(i).getPosX() == 39) {
@@ -477,6 +499,7 @@ public class Game extends ApplicationAdapter {
                     arrayBarril.remove(i);
                 }
             }
+        }
     }
 
 
@@ -507,43 +530,43 @@ public class Game extends ApplicationAdapter {
         }
 
     }
+
     public void desceuEscada() {
 
         if (mario.getPosY() > 40 && mario.getPosY() <= 136) {
             if (mario.getPosX() >= 495 && mario.getPosX() <= 522) {
-                mario.setPosY(mario.getPosY() - 1);
                 mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
                 contSom++;
-                contSom = mario.andaSom(contSom, andar);
+                contSom = mario.andaSom(contSom, walkSom);
             }
 
-        } else if (mario.getPosY() >= 136 && mario.getPosY() <= 232) {
+        }
+        else if (mario.getPosY() >= 136 && mario.getPosY() <= 232) {
             if (mario.getPosX() >= 195 && mario.getPosX() <= 225) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 3), 32, 33, 0, 0);
                 contSom++;
-                contSom = mario.andaSom(contSom, andar);
+                contSom = mario.andaSom(contSom, walkSom);
             }
-        } else if (mario.getPosY() >= 232 && mario.getPosY() <= 325) {
+        }
+        else if (mario.getPosY() >= 232 && mario.getPosY() <= 325) {
             if (mario.getPosX() >= 537 && mario.getPosX() <= 561) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 3), 32, 33, 0, 0);
                 contSom++;
-                contSom = mario.andaSom(contSom, andar);
+                contSom = mario.andaSom(contSom, walkSom);
             }
-        } else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
+        }
+        else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
             if (mario.getPosX() >= 220 && mario.getPosX() <= 260) {
-                mario.setPosY(mario.getPosY() - 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 3), 32, 33, 0, 0);
                 contSom++;
-                contSom = mario.andaSom(contSom, andar);
+                contSom = mario.andaSom(contSom, walkSom);
             }
-        } else if (mario.getPosY() >= 418) {
+        }
+        else if (mario.getPosY() >= 418) {
             if (mario.getPosX() >= 213 && mario.getPosX() <= 237) {
-				mario.setPosY(mario.getPosY() - 1);
-				mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 2), 32, 33, 0, 0);
+				mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() - 3), 32, 33, 0, 0);
                 contSom++;
-                contSom = mario.andaSom(contSom, andar);
+                contSom = mario.andaSom(contSom, walkSom);
             }
         }
     }
@@ -551,23 +574,31 @@ public class Game extends ApplicationAdapter {
     public void subiuEscada() {
         if (mario.getPosY() < 135) {
             if (mario.getPosX() >= 495 && mario.getPosX() <= 522) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 3), 32, 33, 0, 0);
             }
-        } else if (mario.getPosY() >= 135 && mario.getPosY() < 230) {
+        }
+        else if (mario.getPosY() >= 135 && mario.getPosY() < 230) {
             if (mario.getPosX() >= 195 && mario.getPosX() <= 225) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 3), 32, 33, 0, 0);
             }
-        } else if (mario.getPosY() >= 230 && mario.getPosY() < 325) {
+        }
+        else if (mario.getPosY() >= 230 && mario.getPosY() < 325) {
             if (mario.getPosX() >= 537 && mario.getPosX() <= 561) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 3), 32, 33, 0, 0);
             }
-        } else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
+        }
+        else if (mario.getPosY() >= 325 && mario.getPosY() <= 415) {
             if (mario.getPosX() >= 213 && mario.getPosX() <= 237) {
-                mario.setPosY(mario.getPosY() + 1);
-                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 2), 32, 33, 0, 0);
+                mario = new Movel("mario_3_3.png", mario.getPosX(), (mario.getPosY() + 3), 32, 33, 0, 0);
+                //Caso ele chegar no fim da escada, ele ganhou
+                if(mario.getPosY()==418){
+                    contGanhou=true;
+                    if(contGanhou){
+                        ganhouSom.play();
+                        ganhou=1;
+                    }
+
+                }
             }
         }
     }
@@ -576,48 +607,36 @@ public class Game extends ApplicationAdapter {
         if(direcao) {
             //anda pra direita
             if (mario.getPosY() == 40) {
-                mario.setPosX(mario.getPosX() + 1);
-                mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_2_1.png", (mario.getPosX() + 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 136) {
-                mario.setPosX(mario.getPosX() + 1);
-                mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_2_1.png", (mario.getPosX() + 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 232) {
-
-                mario.setPosX(mario.getPosX() + 1);
-                mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_2_1.png", (mario.getPosX() + 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 325) {
-
-                mario.setPosX(mario.getPosX() + 1);
-                mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_2_1.png", (mario.getPosX() + 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 418) {
-                mario.setPosX(mario.getPosX() + 1);
-                mario = new Movel("mario_2_1.png", (mario.getPosX() + 2), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_2_1.png", (mario.getPosX() + 3), mario.getPosY(), 30, 26, 0, 0);
             }
         }else{
             //anda pra esquerda
             if (mario.getPosY() == 40) {
-                mario.setPosX(mario.getPosX() - 3);
-                mario = new Movel("mario_1_2.png", mario.getPosX(), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_1_2.png", (mario.getPosX() - 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 136) {
-                mario.setPosX(mario.getPosX() - 3);
-                mario = new Movel("mario_1_2.png", mario.getPosX(), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_1_2.png", (mario.getPosX() - 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 232) {
-                mario.setPosX(mario.getPosX() - 3);
-                mario = new Movel("mario_1_2.png", mario.getPosX(), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_1_2.png", (mario.getPosX() - 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 325) {
-                mario.setPosX(mario.getPosX() - 3);
-                mario = new Movel("mario_1_2.png", mario.getPosX(), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_1_2.png", (mario.getPosX() - 3), mario.getPosY(), 30, 26, 0, 0);
 
             } else if (mario.getPosY() == 418) {
-                mario.setPosX(mario.getPosX() - 3);
-                mario = new Movel("mario_1_2.png", mario.getPosX(), mario.getPosY(), 30, 26, 0, 0);
+                mario = new Movel("mario_1_2.png", (mario.getPosX() - 3), mario.getPosY(), 30, 26, 0, 0);
             }
         }
 	}
@@ -625,14 +644,9 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        batch.dispose();
-       // morreuSom.dispose();
+        batch.end();
         puloSom.dispose();
-        andar.dispose();
-        stage.dispose();
-        princesa.dispose();
-        mario.dispose();
-        macaco.dispose();
-        stageBarril.dispose();
+        walkSom.dispose();
+
     }
 }

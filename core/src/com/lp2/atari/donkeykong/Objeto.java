@@ -70,5 +70,4 @@ public class Objeto extends ApplicationAdapter {
         this.sizeY = sizeY;
     }
 
-
 }

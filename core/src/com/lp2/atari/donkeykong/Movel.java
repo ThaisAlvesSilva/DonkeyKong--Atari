@@ -118,7 +118,6 @@ public class Movel extends Objeto{
         else if(contador == 61){
 
             contador = -1;
-           // this.setPosY(this.getPosY()-3);
             this.setImg(new Image(new Texture(this.getImgPath())));
             this.getImg().setPosition(this.getPosX(), this.getPosY());
             this.getImg().setSize(this.getSizeX(), this.getSizeY());
@@ -166,8 +165,6 @@ public class Movel extends Objeto{
         }
         return -1;
     }
-
-
 
     public boolean canMove(String orientacao){
         if(orientacao.equals("esquerda")){
