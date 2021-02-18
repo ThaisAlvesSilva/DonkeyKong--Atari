@@ -10,10 +10,8 @@ public class Movel extends Objeto{
 
     private float velX, velY;
 
-    public Movel(String imgPath, float posX, float posY, float sizeX, float sizeY, float velX, float velY) {
+    public Movel(String imgPath, float posX, float posY, float sizeX, float sizeY) {
         super(imgPath, posX, posY, sizeX, sizeY);
-        this.velX = velX;
-        this.velY = velY;
     }
 
     public int pularDiagonalEsquerda(Stage stage, int contador){
@@ -125,21 +123,6 @@ public class Movel extends Objeto{
         }
 
         return contador;
-    }
-    public float getVelX() {
-        return velX;
-    }
-
-    public void setVelX(float velX) {
-        this.velX = velX;
-    }
-
-    public float getVelY() {
-        return velY;
-    }
-
-    public void setVelY(float velY) {
-        this.velY = velY;
     }
 
     public int cai(float chao, Stage stage, int cont) {
