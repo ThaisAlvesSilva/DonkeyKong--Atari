@@ -161,7 +161,6 @@ public class Game extends ApplicationAdapter {
         batch.begin();
 
         //Se ele o i=1, é porque o mario se chocou com o barril
-        //Se
         if(perdeu !=1) perdeu = confereBarril();
         else if(ganhou !=1) ganhou = confereBarril();
 
