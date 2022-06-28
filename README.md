@@ -4,6 +4,9 @@
   
 O jogo possui um cenário composto por 8 plataformas, 4 escadas, 4 buracos, os barris e os personagens (Mario, Donkey Kong e a princesa). O objetivo do jogo é conseguir subir até o final da última escada sem que nenhum barril encoste no personagem Mario. Para controlar o Mário, o código pega o evento das teclas “UP”, “DOWN”, “LEFT”, “RIGHT” e “SPACE”. 
 
+![image](https://user-images.githubusercontent.com/72041841/176224795-c0acb212-277b-4dd3-ae26-ff0d76485765.png)
+
+
 # Solução Proposta (Desenvolvimento) 
 
 As soluções encontradas para o desdobramento do trabalho proposto foram: 
